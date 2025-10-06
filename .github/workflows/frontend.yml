@@ -3,9 +3,12 @@
 name: Build & Push Frontend
 
 on:
-  push:
-    paths:
-      - "frontend/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Choose environment"
+        required: true
+        default: "dev"
 
 jobs:
   build-and-push:
