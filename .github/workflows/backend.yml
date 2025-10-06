@@ -1,14 +1,9 @@
-# .github/workflows/frontend.yml
+# .github/workflows/backend.yml
 
-name: Build & Push Frontend
+name: Build & Push Backend
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Choose environment"
-        required: true
-        default: "dev"
 
 jobs:
   build-and-push:
@@ -18,16 +13,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          node-version: "20"
+          distribution: "temurin"
+          java-version: "21"
 
-      - name: Install & Build
-        working-directory: ./frontend
+      - name: Build Backend with Maven
+        working-directory: ./backend
         run: |
-          npm ci
-          npm run build
+          mvn clean package -DskipTests
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -37,15 +32,17 @@ jobs:
 
       - name: Delete Existing DockerHub Image (Optional)
         run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/burger-frontend:${{ github.sha }}
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/burger-backend:${{ github.sha }}
           echo "Deleting image if exists: $IMAGE_NAME"
           curl -X DELETE \
             -u "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" \
-            "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/burger-frontend/tags/${{ github.sha }}/"
+            "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/burger-backend/tags/${{ github.sha }}/"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend
+          context: ./backend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/burger-frontend:latest
+          tags: |
+
+            ${{ secrets.DOCKERHUB_USERNAME }}/burger-backend:latest

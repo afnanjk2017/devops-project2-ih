@@ -36,16 +36,14 @@ services:
       - burgerbuilder-net
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: http://localhost:8080
-    container_name: burgerbuilder-frontend
+    image: afnanjk2017/burger-frontend:488ba824c8a55143d5de18925674731394de2d51
+    container_name: burgerbuilder-frontend-1
     depends_on:
       - backend
     ports:
       - "5173:80"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
     networks:
       - burgerbuilder-net
 
