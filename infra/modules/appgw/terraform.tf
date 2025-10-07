@@ -81,7 +81,7 @@ resource "azurerm_application_gateway" "agw" {
       name                       = "redir-to-fe"
     }
     path_rule {
-      paths                      = ["/api/*", "/health"]
+      paths                      = ["/api/*"]
       backend_address_pool_name  = local.backend_address_pool_name_be
       backend_http_settings_name = local.http_setting_name_be
       name                       = "redir-to-be"
@@ -101,7 +101,7 @@ resource "azurerm_application_gateway" "agw" {
     interval                                  = 120
     name                                      = local.pe_probe_be
     port                                      = var.be_port
-    path                                      = "/health"
+    path                                      = "/"
     timeout                                   = 60
     unhealthy_threshold                       = 3
     pick_host_name_from_backend_http_settings = true
