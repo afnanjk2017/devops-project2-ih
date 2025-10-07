@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Terraform Plan
         working-directory: ./infra
-        run: terraform plan
+        run: terraform plan -lock=false
 
       - name: Apply Terraform (Few times due to inconsistent plan errors that just resolve with retry.)
         working-directory: ./infra
