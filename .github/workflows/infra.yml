@@ -49,7 +49,7 @@ jobs:
 
       - name: Apply Terraform (Few times due to inconsistent plan errors that just resolve with retry.)
         working-directory: ./infra
-        run: terraform apply -auto-approve || terraform apply -auto-approve || terraform apply -auto-approve
+        run: terraform apply -auto-approve -lock=false || terraform apply -auto-approve -lock=false || terraform apply -auto-approve -lock=false
 
       - name: Get Gateway Public IP
         id: get_ip
