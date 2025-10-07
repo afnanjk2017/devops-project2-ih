@@ -22,9 +22,11 @@ jobs:
       TF_VAR_fe_image_name_and_tag: ${{ secrets.fe_image_name_and_tag}}
 
     name: "Builds the infrastructure on Azure"
+
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout the branch"
+
         uses: "actions/checkout@v5"
 
       - name: Azure Login (Service Principal)
@@ -36,12 +38,15 @@ jobs:
         uses: hashicorp/setup-terraform@v3.1.2
 
       - name: "Initialize Terraform"
+        working-directory: ./infra
         run: terraform init
 
       - name: Run Terraform Plan
+        working-directory: ./infra
         run: terraform plan
 
       - name: Apply Terraform (Few times due to inconsistent plan errors that just resolve with retry.)
+        working-directory: ./infra
         run: terraform apply -auto-approve || terraform apply -auto-approve || terraform apply -auto-approve
 
       - name: Get Gateway Public IP
