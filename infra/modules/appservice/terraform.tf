@@ -39,7 +39,7 @@ resource "azurerm_linux_web_app" "fe_app" {
   }
 
   app_settings = {
-    "REACT_APP_API_URL" = "http://${var.agw_ip}/api"
+    "VITE_API_BASE_URL" = "http://${var.agw_ip}/api"
   }
 
 }
@@ -79,20 +79,16 @@ resource "azurerm_linux_web_app" "be_app" {
   }
 
   app_settings = {
-    PORT                        = var.be_port
-    NODE_ENV                    = "development"
-    DB_SERVER                   = var.db_server
-    DB_USER                     = var.db_user
-    DB_PASSWORD                 = var.db_password
-    DB_NAME                     = var.db_name
-    CORS_ORIGIN                 = var.agw_ip
-    DB_ENCRYPT                  = "true"
-    DB_TRUST_SERVER_CERTIFICATE = "false"
-    DB_CONNECTION_TIMEOUT       = "30000"
-    JWT_EXPIRES_IN              = "7d"
-    RATE_LIMIT_WINDOW_MS        = "900000"
-    RATE_LIMIT_MAX_REQUESTS     = "100"
-    JWT_SECRET                  = "here-is-some-random-bs-long-text-string"
+    PORT                   = var.be_port
+    SPRING_PROFILES_ACTIVE = "azure"
+    DB_HOST                = var.db_server
+    DB_PORT                = 1433 # e.g., 1433
+    DB_NAME                = var.db_name
+    DB_USERNAME            = var.db_user # e.g., afnan
+    DB_PASSWORD            = var.db_password
+    DB_DRIVER              = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    CORS_ALLOWED_ORIGINS   = var.agw_ip
+
   }
 
 }
