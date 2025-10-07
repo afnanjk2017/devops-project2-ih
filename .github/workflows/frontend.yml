@@ -49,3 +49,5 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/burger-frontend:latest
+          build-args: |
+            VITE_API_BASE_URL=http://130.131.240.235
