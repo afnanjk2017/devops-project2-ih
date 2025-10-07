@@ -1,4 +1,10 @@
 terraform {
+  backend "azurerm" {
+    resource_group_name  = "devops-afnan-storage-rg"
+    storage_account_name = "project2afnanstorage"
+    container_name       = "terraformstate"
+    key                  = "terraform.tfstate"
+  }
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
