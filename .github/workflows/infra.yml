@@ -11,7 +11,6 @@ on:
 jobs:
   create-resources:
     env:
-      TF_VAR_db_user: ${{secrets.DB_USER}}
       TF_VAR_ARM_SUBSCRIPTION_ID: ${{secrets.ARM_SUBSCRIPTION_ID}}
       TF_VAR_db_password: ${{secrets.db_password}}
       TF_VAR_db_admin: ${{secrets.db_admin}}
@@ -19,8 +18,8 @@ jobs:
       TF_VAR_resource_prefix: ${{secrets.resource_prefix}}
       TF_VAR_resource_group_name: ${{secrets.resource_group_name}}
       TF_VAR_resource_group_location: ${{secrets.resource_group_location}}
-      TF_VAR_be_port: 80
-      TF_VAR_fe_port: 80
+      TF_VAR_be_image_name_and_tag: ${{ secrets.be_image_name_and_tag}}
+      TF_VAR_fe_image_name_and_tag: ${{ secrets.fe_image_name_and_tag}}
 
     name: "Builds the infrastructure on Azure"
     runs-on: ubuntu-latest
@@ -38,11 +37,6 @@ jobs:
 
       - name: "Initialize Terraform"
         run: terraform init
-
-      - name: Export the image names
-        run: |
-          echo "TF_VAR_be_image_name=${{env.be_image_name}}" >> $GITHUB_ENV
-          echo "TF_VAR_fe_image_name=${{env.fe_image_name}}" >> $GITHUB_ENV
 
       - name: Run Terraform Plan
         run: terraform plan
