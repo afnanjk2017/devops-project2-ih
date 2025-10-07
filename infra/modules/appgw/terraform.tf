@@ -101,7 +101,7 @@ resource "azurerm_application_gateway" "agw" {
     interval                                  = 120
     name                                      = local.pe_probe_be
     port                                      = var.be_port
-    path                                      = "/"
+    path                                      = "/api/health"
     timeout                                   = 60
     unhealthy_threshold                       = 3
     pick_host_name_from_backend_http_settings = true

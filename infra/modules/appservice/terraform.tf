@@ -61,7 +61,7 @@ resource "azurerm_linux_web_app" "be_app" {
       # "https://${local.fe_app_name}.azurewebsites.net",
       allowed_origins = [var.agw_ip]
     }
-    health_check_path                 = "/api"
+    health_check_path                 = "/api/health"
     health_check_eviction_time_in_min = 5
     ip_restriction {
       name                      = "allow-agw"
