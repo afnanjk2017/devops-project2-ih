@@ -20,6 +20,8 @@ jobs:
       TF_VAR_resource_group_location: ${{secrets.resource_group_location}}
       TF_VAR_be_image_name_and_tag: ${{ secrets.be_image_name_and_tag}}
       TF_VAR_fe_image_name_and_tag: ${{ secrets.fe_image_name_and_tag}}
+      TF_VAR_contact_person_email: ${{ secrets.contact_person_email }}
+      TF_VAR_contact_person_name: ${{ secrets.contact_person_name }}
 
     name: "Builds the infrastructure on Azure"
 
