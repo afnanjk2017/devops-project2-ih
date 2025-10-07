@@ -22,7 +22,7 @@ resource "azurerm_linux_web_app" "fe_app" {
     application_stack {
       docker_image_name = var.fe_image_name_and_tag
     }
-    health_check_path                 = "/health"
+    #health_check_path                 = "/health"
     health_check_eviction_time_in_min = 5
     ip_restriction {
       name                      = "allow-agw"
@@ -61,7 +61,7 @@ resource "azurerm_linux_web_app" "be_app" {
       # "https://${local.fe_app_name}.azurewebsites.net",
       allowed_origins = [var.agw_ip]
     }
-    health_check_path                 = "/health"
+    #health_check_path                 = "/health"
     health_check_eviction_time_in_min = 5
     ip_restriction {
       name                      = "allow-agw"
@@ -79,7 +79,7 @@ resource "azurerm_linux_web_app" "be_app" {
   }
 
   app_settings = {
-    PORT                   = var.be_port
+    SERVER_PORT            = 8080
     SPRING_PROFILES_ACTIVE = "azure"
     DB_HOST                = var.db_server
     DB_PORT                = 1433 # e.g., 1433
@@ -87,7 +87,7 @@ resource "azurerm_linux_web_app" "be_app" {
     DB_USERNAME            = var.db_user # e.g., afnan
     DB_PASSWORD            = var.db_password
     DB_DRIVER              = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
-    CORS_ALLOWED_ORIGINS   = var.agw_ip
+    CORS_ALLOWED_ORIGINS   = "http://${var.agw_ip}"
 
   }
 
