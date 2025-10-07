@@ -39,7 +39,7 @@ resource "azurerm_linux_web_app" "fe_app" {
   }
 
   app_settings = {
-    "VITE_API_BASE_URL" = "http://${var.agw_ip}/api"
+    "VITE_API_BASE_URL" = "http://${var.agw_ip}"
   }
 
 }
