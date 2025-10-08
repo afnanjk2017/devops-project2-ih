@@ -14,7 +14,7 @@ variable "blob_con" {
   type        = string
   description = "container of key "
 }
-variable "storage_rq" {
+variable "storage_rg" {
   type        = string
   description = "RG storage"
 }
