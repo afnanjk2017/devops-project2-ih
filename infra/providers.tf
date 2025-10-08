@@ -1,9 +1,6 @@
 terraform {
   backend "azurerm" {
-    resource_group_name  = var.storage_rg
-    storage_account_name = var.storage_ac
-    container_name       = var.blob_con
-    key                  = var.keytf
+
   }
   required_providers {
     azurerm = {
