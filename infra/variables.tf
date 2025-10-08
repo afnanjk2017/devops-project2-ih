@@ -2,6 +2,22 @@ variable "ARM_SUBSCRIPTION_ID" {
   type        = string
   description = "Azure RM sub ID"
 }
+variable "keytf" {
+  type        = string
+  description = "storage key"
+}
+variable "storage_ac" {
+  type        = string
+  description = "storage account"
+}
+variable "blob_con" {
+  type        = string
+  description = "container of key "
+}
+variable "storage_rq" {
+  type        = string
+  description = "RG storage"
+}
 variable "db_password" {
   type        = string
   sensitive   = true

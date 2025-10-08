@@ -1,9 +1,9 @@
 terraform {
   backend "azurerm" {
-    resource_group_name  = "devops-afnan-storage-rg"
-    storage_account_name = "project2afnanstorage"
-    container_name       = "terraformstate"
-    key                  = "terraform.tfstate"
+    resource_group_name  = var.storage_rq
+    storage_account_name = var.storage_ac
+    container_name       = var.blob_con
+    key                  = var.keytf
   }
   required_providers {
     azurerm = {
