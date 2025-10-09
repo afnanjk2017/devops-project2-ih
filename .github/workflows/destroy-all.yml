@@ -35,6 +35,10 @@ jobs:
             -backend-config="container_name=${{ secrets.BLOB_CON }}" \
             -backend-config="key=${{ secrets.keytf }}"
 
+      - name: "destroy all plan"
+        working-directory: ./infra
+        run: terraform plan -destroy -lock=false
+
       - name: "destroy all "
         working-directory: ./infra
         run: terraform destroy -auto-approve -lock=false || terraform destroy -auto-approve -lock=false || terraform destroy -auto-approve -lock=false
