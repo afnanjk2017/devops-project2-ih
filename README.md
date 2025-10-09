@@ -1,286 +1,66 @@
-# Burger Builder Application
+# DevOps Project 2 - Azure Web App Infrastructure and Deployment
 
-A full-stack web application for building and ordering custom burgers with a modern React frontend and Spring Boot backend API.
+This repository contains the infrastructure as code (IaC) and continuous integration/continuous deployment (CI/CD) pipelines for a web application deployed on Azure. The project provisions the necessary Azure resources using Terraform and deploys the backend and frontend services using GitHub Actions.
 
-## Project Structure
+## Prerequisites
 
-```
-capstone_project_ih/
-├── frontend/                 # React + TypeScript + Vite frontend
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── context/         # React Context providers
-│   │   ├── services/        # API service layer
-│   │   ├── types/           # TypeScript type definitions
-│   │   └── utils/           # Utility functions
-│   ├── public/              # Static assets
-│   ├── package.json         # Frontend dependencies
-│   ├── vite.config.ts       # Vite configuration
-│   ├── nginx.conf           # Nginx configuration for production
-│   └── README.md            # Frontend-specific documentation
-├── backend/                 # Spring Boot REST API
-│   ├── src/main/java/com/burgerbuilder/
-│   │   ├── controller/      # REST controllers
-│   │   ├── service/         # Business logic services
-│   │   ├── repository/      # Data access layer
-│   │   ├── entity/          # JPA entities
-│   │   ├── dto/             # Data transfer objects
-│   │   ├── exception/       # Custom exception handling
-│   │   └── config/          # Configuration classes
-│   ├── src/main/resources/
-│   │   ├── application.properties          # Default configuration
-│   │   ├── application-docker.properties   # Docker/PostgreSQL config
-│   │   ├── application-azure.properties    # Azure SQL config
-│   │   ├── schema.sql                      # Database schema
-│   │   └── data.sql                        # Initial data
-│   ├── pom.xml              # Maven dependencies and build config
-│   └── TESTING.md           # Backend testing documentation
-├── environment.env.example  # Environment variables template
-└── environment.env          # Environment variables (create from example)
-```
+Before you can provision and deploy this project, ensure you have the following in place:
 
-## Frontend Application
+1.  **Azure Subscription**: An active Azure subscription with sufficient permissions to create resources.
+2.  **Azure CLI**: Installed and configured on your local machine to authenticate with Azure.
+3.  **Permissions**:
+    *   **Service Principal**: A service principal with `Contributor` or similar permissions on the target Azure subscription or resource group. This is used by the GitHub Actions to authenticate and manage resources.
+    *   **User Permissions**: Ensure your personal Azure account has permissions to manage resources.
+4.  **Budgets/Quotas**: Confirm that your subscription has adequate quotas for the resources being provisioned, such as virtual machines, databases, and network components.
+5.  **GitHub Secrets**: Configure the following secrets in your GitHub repository settings under `Settings > Secrets and variables > Actions`:
+    *   `AZURE_CREDS`: The credentials JSON for your Azure service principal.
+    *   `ARM_SUBSCRIPTION_ID`: Your Azure subscription ID.
+    *   `DOCKERHUB_USERNAME`: Your Docker Hub username.
+    *   `DOCKERHUB_TOKEN`: A Docker Hub access token.
+    *   `db_password`: The password for the SQL database.
+    *   `db_admin`: The admin username for the SQL database.
+    *   `STORAGE_RG`: The name of the resource group for the Terraform state storage.
+    *   `STORAGE_AC`: The name of the Azure Storage account for the Terraform state.
+    *   `BLOB_CON`: The name of the blob container for the Terraform state.
+    *   `KEYTF`: The key for the Terraform state file (e.g., `devops-project2.tfstate`).
+    *   `resource_prefix`: A prefix for naming all resources.
+    *   Other Terraform variables as defined in `infra/variables.tf`.
 
-### Tech Stack
+## How to Provision (Terraform)
 
-- **Framework**: React 19.1.1
-- **Language**: TypeScript 5.8.3
-- **Build Tool**: Vite 7.1.7
-- **Routing**: React Router DOM 7.9.3
-- **HTTP Client**: Axios 1.12.2
-- **Testing**: Vitest 1.0.4 + Testing Library
-- **Linting**: ESLint 9.36.0
-- **CSS**: Vanilla CSS with CSS modules
+The infrastructure for this project is defined in the `infra` directory using Terraform. The provisioning process is automated via a GitHub Actions workflow.
 
-### Key Features
+1.  **Configure Terraform Backend**: The Terraform state is stored remotely in an Azure Storage account. Ensure the resource group, storage account, and container are created beforehand. The workflow in `.github/workflows/infra.yml` is configured to use this remote state.
+2.  **Trigger the Workflow**: Navigate to the `Actions` tab in your GitHub repository, select the `infrastructure` workflow, and manually run it using `workflow_dispatch`. Alternatively, a push to the `infra/**` directory will automatically trigger this workflow.
+3.  **Monitor the Deployment**: The GitHub Actions workflow will perform `terraform init`, `terraform plan`, and `terraform apply`. Monitor the job logs to ensure all resources are created successfully. The plan includes retries to handle transient errors.
 
-- Interactive burger builder with drag-and-drop ingredients
-- Shopping cart management with session persistence
-- Order creation and tracking
-- Order history viewing
-- Responsive design with modern UI/UX
-- Real-time API integration
-- Comprehensive testing coverage
+## How to Deploy (GitHub Actions)
 
-### Backend URL Configuration
+The application deployment is handled by separate GitHub Actions workflows for the backend and frontend. These workflows build and push Docker images to Docker Hub and then pass the image tags to the infrastructure workflow for deployment to Azure App Service.
 
-The frontend connects to the backend API through the following configuration:
+1.  **Deploy Backend**:
+    *   The `backend.yml` workflow is triggered by pushes to the `backend/**` directory or can be run manually.
+    *   It builds the Spring Boot application using Maven, creates a Docker image, and pushes it to Docker Hub with the `latest` tag.
+    *   This image is then referenced by the infrastructure workflow (`infra.yml`) to update the Azure App Service.
 
-**Location**: `frontend/src/services/api.ts`
+2.  **Deploy Frontend**:
+    *   The `frontend.yml` workflow is triggered by pushes to the `frontend/**` directory or can be run manually.
+    *   It builds the React application, creates a Docker image, and pushes it to Docker Hub.
+    *   The build process includes a build argument `VITE_API_BASE_URL` to configure the backend API endpoint. The workflow retrieves the public IP of the Application Gateway to set this value.
 
-```typescript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-```
+## How to Validate
 
-**Required Environment Variable**:
-- `VITE_API_BASE_URL`: The base URL for the backend API (defaults to `http://localhost:8080`)
+After the infrastructure is provisioned and the applications are deployed, you can validate the deployment.
 
-**Usage**:
-1. Create a `.env` file in the frontend directory
-2. Add: `VITE_API_BASE_URL=http://your-backend-url:8080`
-3. For production: `VITE_API_BASE_URL=https://your-production-api.com`
-
-### Frontend Compilation and Deployment
-
-#### Development Setup
-
-```bash
-cd frontend
-npm install
-npm run dev          # Start development server (http://localhost:5173)
-npm run test         # Run tests
-npm run test:ui      # Run tests with UI
-npm run test:coverage # Run tests with coverage
-npm run lint         # Run ESLint
-```
-
-#### Production Build
-
-```bash
-cd frontend
-npm run build        # Build for production
-npm run preview      # Preview production build locally
-```
-
-The build process:
-1. **TypeScript Compilation**: `tsc -b` compiles TypeScript to JavaScript
-2. **Vite Build**: Bundles and optimizes assets
-3. **Output**: Creates `dist/` folder with production-ready files
-
-#### Deployment Options
-
-**Option 1: Static Hosting (Recommended)**
-- Build the application: `npm run build`
-- Deploy the `dist/` folder to any static hosting service:
-  - Vercel, Netlify, AWS S3, Azure Static Web Apps
-  - Set `VITE_API_BASE_URL` environment variable in hosting platform
-
-**Option 2: Docker with Nginx**
-- The project includes `nginx.conf` for containerized deployment
-- Nginx serves the built React app with optimizations:
-  - Gzip compression
-  - Static asset caching
-  - Security headers
-  - SPA routing support
-
-**Option 3: Traditional Web Server**
-- Upload built files to any web server (Apache, Nginx, IIS)
-- Configure server to serve `index.html` for all routes (SPA support)
-
-## Backend Application
-
-### Tech Stack
-
-- **Framework**: Spring Boot 3.2.0
-- **Language**: Java 21
-- **Build Tool**: Maven
-- **Database**: 
-  - PostgreSQL (Docker/Development)
-  - Azure SQL Database (Production)
-- **ORM**: Spring Data JPA + Hibernate
-- **Validation**: Spring Boot Validation
-- **Utilities**: Lombok
-- **Testing**: Spring Boot Test + H2 Database
-
-### Key Features
-
-- RESTful API for burger ingredients, cart, and orders
-- Session-based cart management
-- Database initialization with sample data
-- CORS configuration for frontend integration
-- Comprehensive error handling
-- Multi-environment configuration support
-
-### Environment Variables Required
-
-The backend requires the following environment variables (defined in `environment.env`):
-
-#### Database Configuration
-- `DB_HOST`: Database server hostname
-- `DB_PORT`: Database port (1433 for SQL Server, 5432 for PostgreSQL)
-- `DB_NAME`: Database name
-- `DB_USERNAME`: Database username
-- `DB_PASSWORD`: Database password
-- `DB_DRIVER`: JDBC driver class name
-
-#### Application Configuration
-- `SPRING_PROFILES_ACTIVE`: Active Spring profile
-  - `docker`: Uses PostgreSQL configuration
-  - `azure`: Uses Azure SQL configuration
-- `SERVER_PORT`: Server port (default: 8080)
-- `CORS_ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
-
-#### Example Configuration
-
-```bash
-# For Docker/PostgreSQL Development
-SPRING_PROFILES_ACTIVE=docker
-DB_HOST=database
-DB_PORT=5432
-DB_NAME=burgerbuilder
-DB_USERNAME=postgres
-DB_PASSWORD=YourStrong!Passw0rd
-DB_DRIVER=org.postgresql.Driver
-
-# For Azure SQL Production
-SPRING_PROFILES_ACTIVE=azure
-DB_HOST=your-server.database.windows.net
-DB_PORT=1433
-DB_NAME=burgerbuilder
-DB_USERNAME=your-username
-DB_PASSWORD=your-password
-DB_DRIVER=com.microsoft.sqlserver.jdbc.SQLServerDriver
-```
-
-### Backend Compilation and Deployment
-
-#### Development Setup
-
-```bash
-cd backend
-mvn clean install     # Download dependencies and compile
-mvn spring-boot:run   # Start development server
-```
-
-#### Production Build
-
-```bash
-cd backend
-mvn clean package     # Build JAR file
-```
-
-The build process:
-1. **Dependency Resolution**: Downloads all Maven dependencies
-2. **Compilation**: Compiles Java source code to bytecode
-3. **Testing**: Runs unit and integration tests
-4. **Packaging**: Creates executable JAR file in `target/` directory
-
-#### Deployment Options
-
-**Option 1: JAR File Execution**
-```bash
-java -jar target/burger-builder-backend-1.0.0.jar
-```
-
-**Option 2: Docker Deployment**
-```bash
-# Build Docker image
-docker build -t burger-builder-backend .
-
-# Run with environment variables
-docker run -p 8080:8080 --env-file environment.env burger-builder-backend
-```
-
-**Option 3: Cloud Platform Deployment**
-- **Azure App Service**: Deploy JAR file directly
-- **AWS Elastic Beanstalk**: Upload JAR file
-- **Google Cloud Run**: Containerized deployment
-- **Heroku**: Git-based deployment
-
-#### Environment-Specific Deployment
-
-**Development (PostgreSQL)**:
-1. Set `SPRING_PROFILES_ACTIVE=docker`
-2. Configure PostgreSQL connection variables
-3. Run with Docker Compose or local PostgreSQL
-
-**Production (Azure SQL)**:
-1. Set `SPRING_PROFILES_ACTIVE=azure`
-2. Configure Azure SQL connection variables
-3. Deploy to cloud platform with proper security configuration
-
-## Getting Started
-
-1. **Clone the repository**
-2. **Set up environment variables**:
-   ```bash
-   cp environment.env.example environment.env
-   # Edit environment.env with your database credentials
-   ```
-3. **Start the backend**:
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
-4. **Start the frontend**:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-5. **Access the application**: http://localhost:5173
-
-## API Endpoints
-
-- `GET /api/ingredients` - Get all ingredients
-- `GET /api/ingredients/{category}` - Get ingredients by category
-- `POST /api/cart/items` - Add item to cart
-- `GET /api/cart/{sessionId}` - Get cart items
-- `DELETE /api/cart/items/{itemId}` - Remove cart item
-- `POST /api/orders` - Create order
-- `GET /api/orders/{orderId}` - Get order details
-- `GET /api/orders/history` - Get order history
-
-## License
-
-This project is part of a capstone project for educational purposes.
+1.  **Get Application URLs**: The Terraform output `agw_ips` provides the public IP address of the Azure Application Gateway. This is the main entry point for your application. You can find this output in the logs of the `infrastructure` workflow run.
+2.  **Test the Application**: Open the public IP address in a web browser to access the frontend. The frontend should be able to communicate with the backend through this gateway.
+3.  **Sample Validation (using `curl`)**:
+    *   **Check Frontend**: Use `curl` to verify that the web application is serving a response.
+        ```sh
+        curl http://<Application-Gateway-IP>
+        ```
+    *   **Check Backend API**: Use `curl` to test an API endpoint, for example, a health check or a sample endpoint.
+        ```sh
+        curl http://<Application-Gateway-IP>/api/health
+        ```
+    *   Replace `<Application-Gateway-IP>` with the actual IP address retrieved from the Terraform outputs.
