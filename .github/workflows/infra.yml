@@ -1,6 +1,9 @@
 name: infrastructure
 
 on:
+  push:
+    paths:
+      - "infra/**"
   workflow_dispatch:
     inputs:
       environment:

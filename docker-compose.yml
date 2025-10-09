@@ -36,7 +36,9 @@ services:
       - burgerbuilder-net
 
   frontend:
-    image: afnanjk2017/burger-frontend:488ba824c8a55143d5de18925674731394de2d51
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: burgerbuilder-frontend-1
     depends_on:
       - backend

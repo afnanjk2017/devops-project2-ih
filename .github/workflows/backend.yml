@@ -3,6 +3,9 @@
 name: Build & Push Backend
 
 on:
+  push:
+    paths:
+      - "backend/**"
   workflow_dispatch:
 
 jobs:
@@ -29,14 +32,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Delete Existing DockerHub Image (Optional)
-        run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/burger-backend:${{ github.sha }}
-          echo "Deleting image if exists: $IMAGE_NAME"
-          curl -X DELETE \
-            -u "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" \
-            "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/burger-backend/tags/${{ github.sha }}/"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
