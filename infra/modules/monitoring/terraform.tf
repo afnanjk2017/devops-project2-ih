@@ -420,17 +420,17 @@ resource "azurerm_monitor_metric_alert" "appgw_health" {
   scopes              = [var.app_gateway_id]
   description         = "Triggers when App Gateway backend health falls below 100% for 5 minutes."
   severity            = 2
+  enabled             = true
+  frequency           = "PT1M" # Check every 1 minute
+  window_size         = "PT5M" # Evaluate over 5 minutes
 
   criteria {
     metric_namespace = "Microsoft.Network/applicationGateways"
-    metric_name      = "BackendHealthyHostCount"
+    metric_name      = "UnhealthyHostCount"
     aggregation      = "Average"
-    operator         = "LessThan"
-    threshold        = 100
+    operator         = "GreaterThan"
+    threshold        = 0
   }
-
-  frequency   = "PT1M"
-  window_size = "PT5M"
 
   action {
     action_group_id = azurerm_monitor_action_group.action_group.id
@@ -446,34 +446,35 @@ resource "azurerm_monitor_metric_alert" "webapp_cpu" {
   name                = "${each.key}-CPU-Alert"
   resource_group_name = var.rg_name
   scopes              = [each.value]
-  description         = "Triggers when ${each.key} app CPU exceeds 70% for 5 minutes."
-  severity            = 3
+  description         = "Alert when CPU usage (CpuTime) is high for 5 minutes"
 
   criteria {
     metric_namespace = "Microsoft.Web/sites"
-    metric_name      = "CpuPercentage"
-    aggregation      = "Average"
+    metric_name      = "CpuTime"
+    aggregation      = "Total"
     operator         = "GreaterThan"
-    threshold        = 70
+    threshold        = 300 # adjust threshold based on your load (seconds of CPU time over 5 mins)
   }
 
-  frequency   = "PT1M"
-  window_size = "PT5M"
+  window_size   = "PT5M" # 5-minute window
+  frequency     = "PT1M" # check every minute
+  severity      = 2
+  auto_mitigate = true
 
   action {
     action_group_id = azurerm_monitor_action_group.action_group.id
   }
 }
-resource "azurerm_monitor_metric_alert" "sql_dtu" {
-  name                = "SQL-DTU-Alert"
+resource "azurerm_monitor_metric_alert" "sql_cpu" {
+  name                = "SQL-cpu-Alert"
   resource_group_name = var.rg_name
   scopes              = [var.db_id]
-  description         = "Triggers when SQL DTU or vCore utilization exceeds 80%."
+  description         = "Triggers when SQL  vCore utilization exceeds 80%."
   severity            = 3
 
   criteria {
     metric_namespace = "Microsoft.Sql/servers/databases"
-    metric_name      = "dtu_consumption_percent"
+    metric_name      = "cpu_percent"
     aggregation      = "Average"
     operator         = "GreaterThan"
     threshold        = 80
