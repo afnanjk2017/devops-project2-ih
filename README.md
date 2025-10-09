@@ -1,6 +1,45 @@
 # DevOps Project 2 - Azure Web App Infrastructure and Deployment
 
-This repository contains the infrastructure as code (IaC) and continuous integration/continuous deployment (CI/CD) pipelines for a web application deployed on Azure. The project provisions the necessary Azure resources using Terraform and deploys the backend and frontend services using GitHub Actions.
+## Project Overview
+
+This project automates the provisioning, deployment, and monitoring of a **frontend-backend web application** on **Azure** using **Terraform** and **GitHub Actions**, leveraging **Docker containers** for CI/CD.
+
+### Resources 
+![#](images/resources.png)
+
+- **Resource Groups, VNets, Subnets, NSGs** for networking and organization.
+- **Azure App Services** for frontend and backend.
+- **Application Gateway** for load balancing and secure traffic.
+- **SQL Database** for backend storage.
+- **Log Analytics & Application Insights** for monitoring.
+- **Alerts & Action Groups** for key metrics notifications.
+
+
+### Alerts and Monitoring
+
+- **Application Gateway:** backend health < 100%.
+- **App Services:** CPU > 70% for 5 min.
+- **SQL Database:** CPU/DTU/vCore > 80% or failed requests.
+- **App Insights:** tracks requests, failures, dependencies, memory, response time.
+
+Notifications are sent via **email**.
+
+### Docker Images
+
+- **Backend:** Java + Maven, pushed to DockerHub.
+- **Frontend:** Node.js, API base URL set to App Gateway IP, pushed to DockerHub.
+
+### Continuous Deployment
+
+Workflows automate:
+
+- Terraform infrastructure provisioning (`infra.yml`)
+- Backend build & Docker push (`backend.yml`)
+- Frontend build & Docker push (`frontend.yml`)
+- Live variable injection (e.g., App Gateway IP)
+
+This ensures a fully automated and reproducible environment.
+
 
 ## Prerequisites
 
