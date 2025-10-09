@@ -100,3 +100,19 @@ variable "fe_image_name_and_tag" {
   type        = string
   description = "The name and tag of the frontend image on dockerhub: username/image:tag"
 }
+variable "insghtsKey_fe" {
+  type        = string
+  description = "The key of app insight"
+}
+variable "insghtsKey_be" {
+  type        = string
+  description = "The key of app insight"
+}
+variable "connect_be" {
+  type        = string
+  description = "The key of app insight"
+}
+variable "connect_fe" {
+  type        = string
+  description = "The key of app insight"
+}

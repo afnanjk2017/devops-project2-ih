@@ -16,6 +16,10 @@ variable "fe_app_id" {
   type        = string
   description = "ID of the frontend container app"
 }
+variable "app_gateway_id" {
+  type        = string
+  description = "ID of the  gateway"
+}
 variable "be_app_id" {
   type        = string
   description = "ID of the backend container app"

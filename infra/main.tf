@@ -40,7 +40,13 @@ module "appservice" {
   agw_ip                     = module.appgw.agw_ip
   fe_image_name_and_tag      = var.fe_image_name_and_tag
   be_image_name_and_tag      = var.be_image_name_and_tag
+  insghtsKey_fe              = module.monitoring.insghtsKey_fe
+  insghtsKey_be              = module.monitoring.insghtsKey_be
+  connect_be                 = module.monitoring.connect_be
+  connect_fe                 = module.monitoring.connect_fe
+
 }
+
 module "db" {
   source                     = "./modules/db"
   rg_location                = module.resourcegroups.rg_location
@@ -55,7 +61,7 @@ module "db" {
   rg_id                      = module.resourcegroups.rg_id
   db_admin                   = var.db_admin
 }
-/* module "monitoring" {
+module "monitoring" {
   source               = "./modules/monitoring"
   rg_location          = module.resourcegroups.rg_location
   rg_name              = module.resourcegroups.rg_name
@@ -71,7 +77,8 @@ module "db" {
   service_plan_be_name = module.appservice.service_plan_be_name
   service_plan_fe_id   = module.appservice.service_plan_fe_id
   service_plan_fe_name = module.appservice.service_plan_fe_name
-} */
+  app_gateway_id       = module.appgw.gw_id
+}
 module "nsg" {
   source          = "./modules/nsg"
   be_app_id       = module.appservice.be_app_id

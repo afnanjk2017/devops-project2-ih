@@ -39,7 +39,10 @@ resource "azurerm_linux_web_app" "fe_app" {
   }
 
   app_settings = {
-    "VITE_API_BASE_URL" = "http://${var.agw_ip}"
+    "VITE_API_BASE_URL"                     = "http://${var.agw_ip}"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = var.insghtsKey_fe
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = var.connect_fe
+
   }
 
 }
@@ -79,15 +82,18 @@ resource "azurerm_linux_web_app" "be_app" {
   }
 
   app_settings = {
-    SERVER_PORT            = 8080
-    SPRING_PROFILES_ACTIVE = "azure"
-    DB_HOST                = var.db_server
-    DB_PORT                = 1433 # e.g., 1433
-    DB_NAME                = var.db_name
-    DB_USERNAME            = var.db_user # e.g., afnan
-    DB_PASSWORD            = var.db_password
-    DB_DRIVER              = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
-    CORS_ALLOWED_ORIGINS   = "http://${var.agw_ip}"
+    SERVER_PORT                             = 8080
+    SPRING_PROFILES_ACTIVE                  = "azure"
+    DB_HOST                                 = var.db_server
+    DB_PORT                                 = 1433 # e.g., 1433
+    DB_NAME                                 = var.db_name
+    DB_USERNAME                             = var.db_user # e.g., afnan
+    DB_PASSWORD                             = var.db_password
+    DB_DRIVER                               = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    CORS_ALLOWED_ORIGINS                    = "http://${var.agw_ip}"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = var.insghtsKey_be
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = var.connect_be
+
 
   }
 
